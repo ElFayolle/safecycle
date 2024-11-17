@@ -14,7 +14,7 @@ source_code;Code source;Source code
 mountain_bike;Route avec chemin (VTT);Route with tracks (mountain bike)
 electric_bike;Vélo électrique;Electric bike
 sort.safe;Plus sûr;Safer
-sort.fast;Plus rapide;Faster
+sort.efficient;Plus économe;More efficient
 view.safety;Sureté;Safety
 view.slope;Dénivelé;Slopes
 reset_route;Supprimer l'itinéraire;Reset the route
@@ -34,3 +34,4 @@ savings_end;de vélotaf, en remplacement de la voiture.;of bicycle comute
 year;an;year
 sort_label;tri;sort
 view_label;vue ;view
+energy;énergie;energy

@@ -18,7 +18,7 @@ const CO2_PER_KM = 0.120
 
 const SortType = {
     SAFE : "safe",
-    FAST : "fast"
+    EFFICIENT : "efficient",
 }
 
 const address_parts = ["commercial", "shop", "tourism", "amenity", "highway", "road", "village", "town", "city"]
@@ -334,7 +334,7 @@ function updateList() {
 
     let sortedIti = state.itineraries ? [...state.itineraries] : [];
     sortedIti.sortOn(function (iti) {
-        return (state.sort === SortType.SAFE) ? (iti.unsafe_score) : iti.time;
+        return (state.sort === SortType.SAFE) ? (iti.unsafe_score) : iti.energy;
     })
 
     let max_distance = Math.max(...sortedIti.map(iti => iti.length));
@@ -371,20 +371,31 @@ function updateList() {
         let maxElevation = Math.max(...iti.paths.map((path) => (path.coords.length === 0) ? 0 : path.coords[0].elevation));
 
         let height = (maxElevation - minElevation) / ELEVATION_PER_PIXEL;
+        let energy = 0;
 
         function point(x, y) {
             return x.toFixed() + "," + (height - y).toFixed()
         }
 
         for (let path of iti.paths) {
-            if (path.coords.length < 1) {continue}
+            if (path.coords.length < 1) {
+                continue
+            }
+
+            // Accumlate some metrics
+            distance += path.length;
+            energy += path.energy;
+
+
+
             let coord1  = path.coords[0];
             let coord2 = path.coords[path.coords.length-1];
             let x1 = distance / max_distance * full_width;
             let x2 = (distance + path.length) / max_distance * full_width;
-            distance += path.length;
+
             let y1 = (coord1.elevation - minElevation) / ELEVATION_PER_PIXEL;
             let y2 = (coord2.elevation - minElevation) / ELEVATION_PER_PIXEL;
+
 
             slopes.push({
                 points: [point(x1, 0), point(x1, y1), point(x2, y2), point(x2, 0)].join(" "),
@@ -416,7 +427,8 @@ function updateList() {
             minElevation:minElevation.toFixed(),
             maxElevation:maxElevation.toFixed(),
             unsafe :(unsafeDistance(iti) /1000),
-            distance: (iti.length/1000).toFixed(1)}
+            distance: (iti.length/1000).toFixed(1),
+            energy: (energy).toFixed(0)}
     });
 
     let data = {
@@ -427,7 +439,7 @@ function updateList() {
         sort:state.sort,
         view:state.view,
         view_alt : state.view === VIEW_SAFETY ? VIEW_SLOPE : VIEW_SAFETY,
-        sort_alt : state.sort === SortType.SAFE ? SortType.FAST : SortType.SAFE,
+        sort_alt : state.sort === SortType.SAFE ? SortType.EFFICIENT : SortType.SAFE,
         _:_,
         colors:typeColors};
 

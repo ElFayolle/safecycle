@@ -20,6 +20,11 @@ class Config:
 
     BROUTER_ROOT="http://brouter.de/brouter"
 
+    # TODO Change this model
+    # Simple dummy linear model of energy spent per distance in Watthour/km
+    ENERGY_PER_DISTANCE = float(env("ENERGY_PER_DISTANCE", 30))
+    WEIGHT = float(env("WEIGHT", 80)) # Might be useful for the energy model ?
+
     CACHE_TYPE="SimpleCache"  # Flask-Caching related configs
 
     CACHE_DEFAULT_TIMEOUT = int(env("CACHE_DEFAULT_TIMEOUT", 24*3600))

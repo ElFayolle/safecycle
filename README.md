@@ -11,9 +11,18 @@ This service is developed by [l'Atelier des communs](<https://atelier-des-commun
 
 ## Setup
 
-This website is developped in Python / [Flask](https://flask.palletsprojects.com/en/2.0.x/])
 
-1) Create a file `.env` with the same folder, with at least the mandatory parameter set :
+1) Create and activate a dedicated environment with python 3.9. For instance with [Conda](https://www.anaconda.com/download) 
+```bash
+conda create --name lifecycle python=3.9
+conda activate lifecycle
+```
+
+2) Install Python dependencies :
+    
+```> pip install -r requirements```
+
+3) Create a file `.env` with the same folder, with at least the mandatory parameter set :
 
    | Key         | Value     | Default |
    |--------------|-----------|------------|
@@ -27,15 +36,11 @@ This website is developped in Python / [Flask](https://flask.palletsprojects.com
                                                        
    See other settings in [config.py](lib/config.py)                                                     
 
-2) Install dependencies :
-    
-    ```> pip install -r requirements```
-
-3) Run flask 
+4) Run flask 
 
     ```> flask run```
     
-4) Access [http://localhost:5000](http://localhost:5000)
+5) Access [http://localhost:5000](http://localhost:5000)
     
 For production, you might want to use a WSGI server like [gunicorn](https://gunicorn.org/)
 

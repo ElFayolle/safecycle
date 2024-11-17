@@ -128,8 +128,6 @@
     <ul class="list-group mr-2" id="list-placeholder">
 
 
-
-
     [[for itineraries itemVar="~iti" ]]
     <li class="list-group-item iti-item mb-3" data-iti-id="[[:id ]]">
         <div class="dropleft float-right">
@@ -152,6 +150,7 @@
             <span title="{{ _.slopes }} : [[if drops.positive > 0 ]] +[[: drops.positive ]]m [[/if ]] / [[if drops.negative > 0 ]] -[[: drops.negative ]]m [[/if ]]" class="ml-2" ><i class="bi-graph-up" ></i>
                 [[if drops.positive > 0 ]] +[[: drops.positive ]]m [[/if ]]
             </span>
+            <span title="{{ _.energy }}"><i class="bi-battery-charging" ></i> [[:energy ]] wh</span>
         </h5>
 
             [[for shares ]]<span class="share-type view-safety" style="background-color:[[: color ]]; width:[[: width ]]px; display:inline-block" title="[[:label ]] : [[: (distance/1000).toFixed(1) ]] km">&nbsp;</span>[[/for ]]

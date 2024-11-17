@@ -79,7 +79,7 @@ def get_route(from_latlon, to_latlon, profile, fullname, alternative=0):
 
         #debug(json.dumps(res.json(), indent=2))
 
-        res = process_message(res.json())
+        res = parse_brouter_response(res.json())
         res.alternative = alternative
         res.profile = profile
         res.id = "%s-%d" %(profile,  alternative)
@@ -104,7 +104,8 @@ def get_route_safe(from_latlon, to_latlon, profile, alternative=0, **params):
         raise ex
 
 
-def process_message(js) :
+def parse_brouter_response(js) :
+    '''Transform a single JSON respo,se from Brouter to an Itinerary object'''
 
     features = js["features"][0]
     props = features["properties"]
@@ -113,12 +114,10 @@ def process_message(js) :
     header = messages.pop(0)
     messages = list(dict((k, v) for k, v in zip(header, message)) for message in messages)
 
+    # Global properties
     time = int(props["total-time"])
     cost = int(props["cost"])
     length = int(props["track-length"])
-
-    #debug(time=time, cost=cost, length=length)
-    #debug(path_messages=json.dumps(messages, indent=2))
 
     iti = Itinerary(time, length, cost)
 
@@ -283,7 +282,7 @@ def render_profile(profile_name, **params_overrides) :
 
 def get_all_itineraries(start, end, best_only=False,  **params):
 
-    profiles = ["fast", "medium", "safe"]
+    profiles = Config.DEFAULT_PROFILES.keys()
     alternatives = [0, 1, 2]
 
     combinations = [(prof, alt) for prof in profiles for alt in alternatives]

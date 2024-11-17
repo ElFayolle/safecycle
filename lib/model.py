@@ -1,20 +1,23 @@
 from collections import defaultdict
 from typing import List, Dict
 
+from lib.config import Config
 
-BIKE = "bike"
-PATH = "path"
-DANGER = "danger"
-MEDIUM = "medium_traffic"
-LOW = "low_traffic"
+
+class PathType :
+    BIKE = "bike"
+    PATH = "path"
+    DANGER = "danger"
+    MEDIUM = "medium_traffic"
+    LOW = "low_traffic"
 
 # Cost added to unsafe cost, for low traffic (1 is for MEDIUM)
 UNSAFE_SCORE = {
-    BIKE:0,
-    PATH:0,
-    DANGER:10,
-    MEDIUM:1,
-    LOW:0.1
+    PathType.BIKE:0,
+    PathType.PATH:0,
+    PathType.DANGER:10,
+    PathType.MEDIUM:1,
+    PathType.LOW:0.1
 }
 
 
@@ -25,13 +28,24 @@ class Coord :
         self.elevation = elevation
 
 class Path :
+    """ A Path as returned by BRouter.de.
+    It's a part of an itinerary, with a list of segments (coords) and some metrics :
+    - total length
+    - costs (computed by the profile)
+    - tags of ghe road
+
+    THis class also enables to compute additional properties on this :
+    - slope (difference of elevation)
+    - energy used
+    """
     def __init__(self):
         self.tags : Dict[str, str] = {}
         self.length = 0
         self.costs = dict()
         self.coords : List[Coord] = []
 
-    def type(self):
+    def type(self) -> PathType:
+        """Compute a unique type of path from OSM tags of the path"""
 
         def tag_eq(key, value):
             return self.tags.get(key) == value
@@ -57,32 +71,41 @@ class Path :
         probablyGood = ispaved or (not isunpaved and (isbike or tag_eq("highway", "footway")))
 
         if isprotected:
-            return BIKE
+            return PathType.BIKE
 
         if tag_in("highway", ["track", "road", "path", "footway"]) and not probablyGood:
-            return PATH
+            return PathType.PATH
 
         if tag_in("highway", ["trunk", "trunk_link", "primary", "primary_link"]) :
-            return DANGER
+            return PathType.DANGER
 
         if tag_in("highway", ["secondary", "secondary_link"]):
-            return MEDIUM
+            return PathType.MEDIUM
 
-        return LOW
+        return PathType.LOW
 
 
     def slope(self):
+        """Compute difference of elevetion for this path"""
+
         if len(self.coords) < 2 or self.length == 0:
             return 0
         if self.coords[-1].elevation is None or self.coords[0].elevation is None :
             return 0
         return (self.coords[-1].elevation - self.coords[0].elevation) / self.length * 100
 
+    def energy(self):
+        # Energy spent of this path in Watt hour
+        # TODO : Dummy model to be changed
+        return Config.ENERGY_PER_DISTANCE * self.length / 1000
+
     def __json__(self):
         return {
             **self.__dict__,
             "type": self.type(),
-            "slope" : self.slope()}
+            "slope" : self.slope(),
+            "energy" : self.energy()}
+
 
 
 class Itinerary:
@@ -94,7 +117,6 @@ class Itinerary:
         self.cost = cost
         self.length = length
 
-
     def shares(self):
 
         counts = defaultdict(lambda : 0)
@@ -102,8 +124,6 @@ class Itinerary:
         for path in self.paths:
             counts[path.type()] += path.length
         return dict((k, count/self.length) for k, count in counts.items())
-
-
 
     def unsafe_score(self):
 
@@ -113,8 +133,15 @@ class Itinerary:
             res += path.length * UNSAFE_SCORE[path_type]
         return res
 
+    def energy(self):
+        res = 0
+        for path in self.paths:
+            res += path.energy()
+        return res
+
     def __json__(self):
         return {**self.__dict__,
-                "shares":self.shares(),
-                "unsafe_score" : self.unsafe_score()}
+                "shares": self.shares(),
+                "unsafe_score" : self.unsafe_score(),
+                "energy": self.energy()}
 
