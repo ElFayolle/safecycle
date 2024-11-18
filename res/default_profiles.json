@@ -1,8 +1,8 @@
 {
-  "fast" : {
+  "low_energy" : {
       "unprotected_cost" : 1.05,
       "unsafe_cost" : 1.5,
-      "energy_cost" : 0.1
+      "energy_cost" : 3
   },
   "medium" : {
        "unprotected_cost" : 1.1,
@@ -13,10 +13,5 @@
        "unprotected_cost" : 1.2,
        "unsafe_cost" : 10,
        "energy_cost" : 0.1
-  },
-  "low_energy" : {
-       "unprotected_cost" : 1.1,
-       "unsafe_cost" : 3,
-       "energy_cost" : 10
   }
 }

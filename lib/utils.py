@@ -213,7 +213,7 @@ def check_kpis(iti : Itinerary, other_iti: Itinerary, status) :
             and compare(iti.unsafe_score(), other_iti.unsafe_score(), Config.SIGNIFICANT_SAFE_DIFF) in status
     debug(
         iti1=iti.id, iti2=other_iti.id,
-        iti1_time=iti.time, iti2_time=other_iti.time,
+        iti1_time=iti.energy, iti2_time=other_iti.energy,
         iti1_unsafe=iti.unsafe_score(), iti2_unsafe=other_iti.unsafe_score(),
         status=status,
         res=res)
@@ -231,7 +231,7 @@ def purge_bad_itineraries(itis) :
             if iti != other_iti and check_kpis(iti, other_iti, WORSE):
                 break
         else :
-            # iti was better than at least one other itinerary, for one KPI (time or safety) : worth keeping
+            # iti was better than at least one other itinerary, for one KPI (energy or safety) : worth keeping
             res.append(iti)
     debug("Purge bad itis. Before:%d. After:%d" % (len(itis), len(res)))
     return res
