@@ -1,13 +1,16 @@
 from collections import defaultdict
 from typing import List, Dict
+#from app import moutain, elec
 
 from lib.config import Config
 import numpy as np
 
 #Coefficient de frottement
 mu = 0.1
-#Masse du cycliste
+#Masse du cycliste (en kg)
 masse = 180
+#Longueur caractéristique (en m)
+l0 = 10
 
 def conversion(pourcentage):
     return np.pi * np.arctan(pourcentage) / 180
@@ -96,10 +99,9 @@ class Path :
             return PathType.MEDIUM
 
         return PathType.LOW
-
-
     def slope(self):
         """Compute difference of elevetion for this path"""
+
 
         if len(self.coords) < 2 or self.length == 0:
             return 0
@@ -107,9 +109,9 @@ class Path :
             return 0
         return (self.coords[-1].elevation - self.coords[0].elevation) / self.length * 100
 
+
     def energy(self):
         # Energy spent of this path in Watt hour
-        print(self.slope())
         pente = conversion(self.slope())
         v = vitesse(self.slope())
         t0 = self.length / v
@@ -127,7 +129,7 @@ class Path :
             "slope" : self.slope(),
             "energy" : self.energy()}
 
-
+    
 
 class Itinerary:
     def __init__(self, time, length, cost):

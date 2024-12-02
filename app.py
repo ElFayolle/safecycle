@@ -17,6 +17,7 @@ cache.init_app(app)
 
 Compress(app)
 
+#profile = request.args["profile"]
 
 @app.route("/")
 def index():
@@ -31,11 +32,13 @@ def about():
 
     return render_template("about.html", about_text=about_text)
 
+
 @app.route("/api/itineraries")
 def get_itineraries():
 
     start = list(map(lambda s: float(s), request.args["start"].split(",")))
     end = list(map(lambda s: float(s), request.args["end"].split(",")))
+    
     moutain = str2bool(request.args.get("mountain", "false"))
     elec = str2bool(request.args.get("elec", "false"))
     best_only = str2bool(request.args.get("best_only", "true"))
