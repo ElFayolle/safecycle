@@ -37,6 +37,7 @@ class Config:
     # Difference in lowe than this in unsafe distance will be considered identic
     SIGNIFICANT_SAFE_DIFF = int(env("RELEVANT_SAFE_DIFF", 100))
 
+    SIGNIFICANT_ENERGY_DIFF = 0.1
 
     LANGUAGES= env("LANGUAGES", "fr,en").split(",")
 

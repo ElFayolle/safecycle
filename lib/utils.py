@@ -14,6 +14,7 @@ from .model import Itinerary, Path, Coord
 import re
 import sys
 from concurrent.futures import ThreadPoolExecutor
+import numpy as np
 
 MAX_DISTANCE = 10
 
@@ -210,7 +211,8 @@ def check_kpis(iti : Itinerary, other_iti: Itinerary, status) :
     """Return true if iti is equal or worse than other_iti for both KPI"""
 
     res = compare(iti.time, other_iti.time, Config.SIGNIFICANT_TIME_DIFF) == status \
-            and compare(iti.unsafe_score(), other_iti.unsafe_score(), Config.SIGNIFICANT_SAFE_DIFF) in status
+            and compare(iti.unsafe_score(), other_iti.unsafe_score(), Config.SIGNIFICANT_SAFE_DIFF) in status \
+            and compare(iti.energy(), other_iti.energy(), Config.SIGNIFICANT_ENERGY_DIFF)
     debug(
         iti1=iti.id, iti2=other_iti.id,
         iti1_time=iti.energy, iti2_time=other_iti.energy,
@@ -223,7 +225,7 @@ def check_kpis(iti : Itinerary, other_iti: Itinerary, status) :
 
 
 def purge_bad_itineraries(itis) :
-    """Remove itineraries that are neither faster or safer than others"""
+    """Remove itineraries that are neither faster or safer than others, and itineraries that are too costly in energy"""
     res = []
 
     for iti in itis :
@@ -318,11 +320,3 @@ def str2bool(val) :
     if val is None :
         return False
     return val.lower() in ["1", "true", "yes"]
-
-
-
-
-
-
-
-

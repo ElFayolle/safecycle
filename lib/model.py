@@ -2,7 +2,20 @@ from collections import defaultdict
 from typing import List, Dict
 
 from lib.config import Config
+import numpy as np
 
+#Coefficient de frottement
+mu = 0.1
+#Masse du cycliste
+masse = 180
+
+def conversion(pourcentage):
+    return np.pi * np.arctan(pourcentage) / 180
+
+
+
+def vitesse(pente):
+    return 20 * (np.exp((-7.3)*pente))
 
 class PathType :
     BIKE = "bike"
@@ -96,8 +109,16 @@ class Path :
 
     def energy(self):
         # Energy spent of this path in Watt hour
-        # TODO : Dummy model to be changed
-        return Config.ENERGY_PER_DISTANCE * self.length / 1000
+        print(self.slope())
+        pente = conversion(self.slope())
+        v = vitesse(self.slope())
+        t0 = self.length / v
+        Fg = masse * 9.81
+        if pente > 0 :
+            energie = v * (Fg * np.sin(pente) + mu * Fg * np.sin(pente)) * t0
+        else :
+            energie = 0
+        return energie / 3600
 
     def __json__(self):
         return {
