@@ -1,6 +1,5 @@
 from collections import defaultdict
 from typing import List, Dict
-#from app import moutain, elec
 
 from lib.config import Config
 import numpy as np
@@ -8,17 +7,24 @@ import numpy as np
 #Coefficient de frottement
 mu = 0.1
 #Masse du cycliste (en kg)
-masse = 180
+masse = Config.WEIGHT
 #Longueur caractéristique (en m)
-l0 = 10
+l0 = 100
+
+mountain, electric = False, False
 
 def conversion(pourcentage):
     return np.pi * np.arctan(pourcentage) / 180
 
+def use_itinerary_parameters(mountain_param, elec_param):
+    global mountain, electric
+    mountain = mountain_param
+    electric = elec_param
 
 
 def vitesse(pente):
-    return 20 * (np.exp((-7.3)*pente))
+    return 15
+    #return 20 * (np.exp((-7.3)*pente))
 
 class PathType :
     BIKE = "bike"
@@ -99,6 +105,7 @@ class Path :
             return PathType.MEDIUM
 
         return PathType.LOW
+    
     def slope(self):
         """Compute difference of elevetion for this path"""
 
@@ -121,13 +128,65 @@ class Path :
         else :
             energie = 0
         return energie / 3600
+    
+    
+   
+    def difficulty(self):
+        cd = 5/2
+        cv = {'cyclable' : 0, 'route' : 10, 'sentier' : 5}
+        voie = 'route'
+
+        if mountain :
+            cd = 10
+            cv['sentier'] = 0
+       
+        def tag_eq(key, value):
+            return self.tags.get(key) == value
+        def tag_in(key, values) :
+            return self.tags.get(key) in values
+        def tag(key) :
+            return tag_eq(key, "yes")
+        
+        lanes = ["lane", "opposite", "opposite_lane", "track", "opposite_track", "share_busway", "share_lane"]
+
+        isprotected = tag("bicycle_road") \
+                 or tag_eq("bicycle", "designated") \
+                 or tag_eq("highway", "cycleway") \
+                 or tag_in("cycleway", lanes) \
+                 or tag_in("cycleway:right", lanes) \
+                 or tag_in("cycleway:left", lanes)
+
+
+        isbike = isprotected or tag_in("bicycle", ["yes", "permissive"])
+        ispaved = tag_in("surface", ["paved", "asphalt", "concrete", "paving_stones"])
+        isunpaved = not (ispaved or tag_eq("surface", "") or tag_in("surface", ["fine_gravel", "cobblestone"]))
+        probablyGood = ispaved or (not isunpaved and (isbike or tag_eq("highway", "footway")))
+
+        if isbike:
+            voie = 'cyclable'
+        if tag_in("highway", ["track", "path"]) and not probablyGood:
+            voie = 'sentier'
+        if tag_in("highway", ["trunk", "trunk_link", "primary", "primary_link", "road", "footway", "secondary", "secondary_link"]) :
+            voie = 'route'
+
+        pente = self.slope()
+        if pente <= 0 :
+            pente = 0
+
+        difficulty = (cd * pente + cv[voie] * self.length / l0)
+        print(difficulty)
+        return difficulty
+
+
+
 
     def __json__(self):
         return {
             **self.__dict__,
             "type": self.type(),
             "slope" : self.slope(),
-            "energy" : self.energy()}
+            "energy" : self.energy(),
+            "difficulty" : self.difficulty()}
 
     
 
@@ -161,10 +220,18 @@ class Itinerary:
         for path in self.paths:
             res += path.energy()
         return res
+    
+    def difficulty(self):
+        moyenne = 0
+        n = len(self.paths)
+        for path in self.paths:
+            moyenne += path.difficulty()
+        return moyenne / n
 
     def __json__(self):
         return {**self.__dict__,
                 "shares": self.shares(),
                 "unsafe_score" : self.unsafe_score(),
-                "energy": self.energy()}
+                "energy": self.energy(),
+                "difficulty" : self.difficulty()}
 

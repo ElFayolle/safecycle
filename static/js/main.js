@@ -428,7 +428,8 @@ function updateList() {
             maxElevation:maxElevation.toFixed(),
             unsafe :(unsafeDistance(iti) /1000),
             distance: (iti.length/1000).toFixed(1),
-            energy: (energy).toFixed(0)}
+            energy: (energy).toFixed(0),
+            difficulty: iti.difficulty.toFixed(1),}
     });
 
     let data = {

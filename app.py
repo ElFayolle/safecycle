@@ -8,6 +8,7 @@ from lib.i18n import messages, set_lang, get_lang
 from lib.utils import *
 
 from flask_compress import Compress
+from lib.model import use_itinerary_parameters
 
 app = Flask(__name__)
 
@@ -17,7 +18,7 @@ cache.init_app(app)
 
 Compress(app)
 
-#profile = request.args["profile"]
+
 
 @app.route("/")
 def index():
@@ -33,14 +34,17 @@ def about():
     return render_template("about.html", about_text=about_text)
 
 
+
 @app.route("/api/itineraries")
 def get_itineraries():
 
     start = list(map(lambda s: float(s), request.args["start"].split(",")))
     end = list(map(lambda s: float(s), request.args["end"].split(",")))
-    
     moutain = str2bool(request.args.get("mountain", "false"))
     elec = str2bool(request.args.get("elec", "false"))
+
+    use_itinerary_parameters(moutain, elec)
+
     best_only = str2bool(request.args.get("best_only", "true"))
 
     try :
@@ -106,6 +110,7 @@ def global_jinja_context():
             init_zoom=Config.INIT_ZOOM,
             country=Config.COUNTRY),
         lang=get_lang())
+
 
 if __name__ == '__main__':
     app.run()
