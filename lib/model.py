@@ -14,7 +14,7 @@ l0 = 100
 mountain, electric = False, False
 
 def conversion(pourcentage):
-    return np.pi * np.arctan(pourcentage) / 180
+    return np.arctan(pourcentage / 100)
 
 def use_itinerary_parameters(mountain_param, elec_param):
     global mountain, electric
@@ -23,8 +23,7 @@ def use_itinerary_parameters(mountain_param, elec_param):
 
 
 def vitesse(pente):
-    return 15
-    #return 20 * (np.exp((-7.3)*pente))
+    return (20 * (np.exp((-7.3) * pente)))
 
 class PathType :
     BIKE = "bike"
@@ -107,7 +106,7 @@ class Path :
         return PathType.LOW
     
     def slope(self):
-        """Compute difference of elevetion for this path"""
+        """Compute difference of elevation for this path"""
 
 
         if len(self.coords) < 2 or self.length == 0:
@@ -119,12 +118,12 @@ class Path :
 
     def energy(self):
         # Energy spent of this path in Watt hour
-        pente = conversion(self.slope())
-        v = vitesse(self.slope())
+        pente = conversion(self.slope() / 100)
+        v = vitesse(self.slope() / 100)
         t0 = self.length / v
         Fg = masse * 9.81
-        if pente > 0 :
-            energie = v * (Fg * np.sin(pente) + mu * Fg * np.sin(pente)) * t0
+        if pente >= 0 :
+            energie = v * (Fg * np.sin(pente) + mu * Fg * np.cos(pente)) * t0
         else :
             energie = 0
         return energie / 3600
@@ -169,13 +168,12 @@ class Path :
         if tag_in("highway", ["trunk", "trunk_link", "primary", "primary_link", "road", "footway", "secondary", "secondary_link"]) :
             voie = 'route'
 
-        pente = self.slope()
+        pente = self.slope() / 100
         if pente <= 0 :
             pente = 0
 
-        difficulty = (cd * pente + cv[voie] * self.length / l0)
-        print(difficulty)
-        return difficulty
+        difficulty = (cd * pente + cv[voie] * self.length / l0) / (1.5 + 10 * self.length / l0) * 100
+        return(difficulty)
 
 
 
